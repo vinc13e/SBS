@@ -22,7 +22,7 @@ void run_mog(VideoCapture & cam, int algorithm);
 cv::String commands =
         "{help h usage   ? |         | Print this message         }"
         "{@inputData     i |         | Where to find input video  }"
-        "{algorithm      a | 3       | Algorithm to be used, 0:ABSFIDD, 1:MOG, 2:MOG2, 3:GMG }";
+        "{algorithm      a | 2       | Algorithm to be used, 0:ABSFIDD, 1:MOG, (default) 2:MOG2, 3:GMG }";
 
 
 
