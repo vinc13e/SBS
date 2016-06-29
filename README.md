@@ -2,6 +2,7 @@
 Simple Background Subtractor
 
 V0.1
+
 Supported algorithms: ABSDIFF, MOG, MOG2, GMG
 
 ## build:
