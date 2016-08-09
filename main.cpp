@@ -8,7 +8,7 @@
 #include <opencv2/bgsegm.hpp>
 
 namespace sbs{
-    enum {ABSDIFF, MOG, MOG2, GMG};
+enum {ABSDIFF, MOG, MOG2, GMG};
 }
 
 using namespace cv;
@@ -26,7 +26,7 @@ cv::String commands =
 
 
 
-int main(int argc, char *argv[])
+int main_(int argc, char *argv[])
 {
     cv::CommandLineParser parser(argc,argv,commands);
 
@@ -127,6 +127,7 @@ void run_mog(VideoCapture & cam, int algorithm){
         cam >> img;
         pMOG->apply(img, fgMaskMOG);
 
+        imshow("original",img);
         imshow("Foreground Mask",fgMaskMOG);
 
         char key = cv::waitKey(100);
@@ -136,4 +137,76 @@ void run_mog(VideoCapture & cam, int algorithm){
 
     }
 }
+
+
+#include"msmat.h"
+
+int main__(){
+    // cv::Mat in = imread("/home/vmachado/Pictures/italy.jpg");//
+    cv::Mat inRGB = imread("/home/vmachado/Desktop/thermaltestimages/img_00000.bmp");
+    cv::Mat inNIR = imread("/home/vmachado/Desktop/thermaltestimages/img_00001.bmp", CV_LOAD_IMAGE_GRAYSCALE);
+
+    cv::imshow("inRGB", inRGB);
+    cv::imshow("inNIR", inNIR);
+    cv::waitKey(0);
+
+    vector<Mat> inChannels(4);
+    cv::split(inRGB, inChannels);
+    inChannels.push_back(inNIR);
+
+    cv::imshow("B",inChannels.at(0)); cv::waitKey(0);
+
+    std::vector<double> b_w{.5, .0, .0, .5};
+    std::vector<double> g_w{.0, .5, .0, .5};
+    std::vector<double> r_w{.0, .0, .5, .5};
+
+    MSMat msimg(640, 480, inChannels, r_w, g_w, b_w);
+    auto ret = msimg.toMat();
+
+    cv::imshow("ret", ret); cv::waitKey(0);
+}
+
+
+int main(){
+    // "Bench"
+
+    Mat fgMaskMOG; //generated fg mask
+    Ptr <BackgroundSubtractor> pMOG;
+    pMOG = bgsegm::createBackgroundSubtractorGMG(100, 0.8);
+
+    for(int i=0; i< 2107; i+=2){
+        char pRGB[1024];
+        char pNIR[1024];
+        sprintf(pRGB, "/home/vmachado/Desktop/thermaltestimages/1b/img_%05d.bmp", i);
+        sprintf(pNIR, "/home/vmachado/Desktop/thermaltestimages/1a/img_%05d.bmp", i+1);
+
+//        cout << pRGB << endl;
+//        cout << pNIR << endl;
+
+        Mat inRGB = imread(pRGB);
+        Mat inNIR = imread(pNIR, CV_LOAD_IMAGE_GRAYSCALE);
+
+        MSMat a;
+        auto img = a.mergeRGBNIR(inRGB, inNIR);
+        img.convertTo(img, CV_8UC3, 255.5);
+       // cv::imshow("mixed", ret); cv::waitKey(0);
+
+        pMOG->apply(img, fgMaskMOG);
+
+        imshow("original",img);
+        imshow("Foreground Mask",fgMaskMOG);
+
+        char key = cv::waitKey(1);
+        if(key == 'q' || key == 27){
+            break;
+        }
+    }
+}
+
+
+
+//MSMat a;
+//auto ret = a.mergeRGBNIR(inRGB, inNIR);
+//cv::imshow("ret", ret); cv::waitKey(0);
+
 

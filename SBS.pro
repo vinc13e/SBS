@@ -8,4 +8,8 @@ TARGET = sbs
 CONFIG += link_pkgconfig
 PKGCONFIG += opencv
 
-SOURCES += main.cpp
+SOURCES += main.cpp \
+    msmat.cpp
+
+HEADERS += \
+    msmat.h
