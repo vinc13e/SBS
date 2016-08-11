@@ -6,8 +6,24 @@ using namespace std;
 
 
 MSMat::MSMat(int w, int h, vector<cv::Mat> imgs, vector<double> r_w, vector<double> g_w, vector<double> b_w){
-    assert(imgs.size() == r_w.size() && r_w.size() == g_w.size() && g_w.size() == b_w.size());
+    assert((imgs.size() == r_w.size() || r_w.size()==0) && r_w.size() == g_w.size() && g_w.size() == b_w.size());
     assert(w > 0 && h >0);
+    if(r_w.size()==0){
+        auto n_planes = imgs.size();
+        auto i = n_planes;
+        vector<double> tmp;
+        while(i--){
+            r_weights.push_back(1.0F/n_planes);
+            g_weights.push_back(1.0F/n_planes);
+            b_weights.push_back(1.0F/n_planes);
+        }
+    }
+    else{
+        r_weights.swap(r_w);
+        g_weights.swap(g_w);
+        b_weights.swap(b_w);
+    }
+
     rows = h;
     cols = w;
     for( auto img : imgs){
@@ -16,20 +32,22 @@ MSMat::MSMat(int w, int h, vector<cv::Mat> imgs, vector<double> r_w, vector<doub
         cv::resize(tmp, tmp2, cv::Size(w,h));
         planes.push_back(tmp2.clone());
     }
-    r_weights.swap(r_w);
-    g_weights.swap(g_w);
-    b_weights.swap(b_w);
 }
 
 
-void MSMat::normalize_weights(){
-    auto r_acc = std::accumulate(r_weights.begin(), r_weights.end(), 0);
-    auto g_acc = std::accumulate(g_weights.begin(), g_weights.end(), 0);
-    auto b_acc = std::accumulate(b_weights.begin(), b_weights.end(), 0);
+std::vector<cv::Mat> MSMat::getPlanes() const
+{
+    return planes;
+}
 
-    std::for_each(r_weights.begin(), r_weights.end(), [r_acc](double item){ item /=r_acc;});
-    std::for_each(g_weights.begin(), g_weights.end(), [g_acc](double item){ item /=g_acc;});
-    std::for_each(b_weights.begin(), b_weights.end(), [b_acc](double item){ item /=b_acc;});
+void MSMat::normalize_weights(){
+    auto r_acc = std::accumulate(r_weights.begin(), r_weights.end(), 0.0F); // 0.0F defines initial value and return type (0, 0.0f, 0.0F ...)
+    auto g_acc = std::accumulate(g_weights.begin(), g_weights.end(), 0.0F);
+    auto b_acc = std::accumulate(b_weights.begin(), b_weights.end(), 0.0F);
+
+    std::transform(r_weights.begin(), r_weights.end(), r_weights.begin(), [r_acc](double item){ return item/r_acc;});
+    std::transform(g_weights.begin(), g_weights.end(), g_weights.begin(), [g_acc](double item){ return item/g_acc;});
+    std::transform(b_weights.begin(), b_weights.end(), b_weights.begin(), [b_acc](double item){ return item/b_acc;});
 
 }
 
@@ -46,6 +64,7 @@ cv::Mat MSMat::toMat(int type){
         B += plane * b_weights.at(i);
         i++;
     }
+
 
     std::vector<cv::Mat> array_to_merge;
     array_to_merge.push_back(B);
@@ -65,4 +84,9 @@ cv::Mat MSMat::mergeRGBNIR(Mat rgb, Mat nir, vector<double> bw, vector<double> g
     inPlanes.push_back(nir);
     MSMat tmp(rgb.cols, rgb.rows, inPlanes, rw, gw, bw);
     return tmp.toMat();
+}
+
+
+int MSMat::getNPlanes(){
+    return planes.size();
 }

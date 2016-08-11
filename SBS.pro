@@ -9,7 +9,9 @@ CONFIG += link_pkgconfig
 PKGCONFIG += opencv
 
 SOURCES += main.cpp \
-    msmat.cpp
+    msmat.cpp \
+    poolingbs.cpp
 
 HEADERS += \
-    msmat.h
+    msmat.h \
+    poolingbs.h

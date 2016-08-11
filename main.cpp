@@ -7,6 +7,9 @@
 #include <opencv2/video.hpp>
 #include <opencv2/bgsegm.hpp>
 
+#include"msmat.h"
+#include"poolingbs.h"
+
 namespace sbs{
 enum {ABSDIFF, MOG, MOG2, GMG};
 }
@@ -139,7 +142,7 @@ void run_mog(VideoCapture & cam, int algorithm){
 }
 
 
-#include"msmat.h"
+
 
 int main__(){
     // cv::Mat in = imread("/home/vmachado/Pictures/italy.jpg");//
@@ -166,13 +169,46 @@ int main__(){
     cv::imshow("ret", ret); cv::waitKey(0);
 }
 
+/*
+cv::Mat poolingBS(MSMat image){
+    int nplanes = image.getNPlanes();
 
-int main(){
+    vector<Mat> fgMasksMOG; //generated fg masks
+    vector<Ptr<BackgroundSubtractor>> pMogs;
+
+    for(int i=0; i< nplanes; i++){
+        pMogs.push_back(bgsegm::createBackgroundSubtractorMOG());
+    }
+
+}
+*/
+
+int main_fusion(){
+
+    //////////
+    //    std::vector<Mat> planes;
+    //    cv::imreadmulti("/home/vmachado/Desktop/thermaltestimages/img000097.tif", planes);
+    //    cout << planes.size() << endl;
+    //    for(auto img : planes){
+    //        cv::imshow("plane", img); cv::waitKey(0);
+    //    }
+    //    int rows = planes.at(0).rows;
+    //    int cols = planes.at(0).cols;
+    //    MSMat ms(cols, rows, planes);
+    //    auto rgb = ms.toMat();
+    //    cv::imshow("fusioned", rgb); cv::waitKey(0);
+
+    //    cout << rgb.at<Point3d>(324,34);
+
+    //    return 0;
+
+
+
     // "Bench"
 
     Mat fgMaskMOG; //generated fg mask
     Ptr <BackgroundSubtractor> pMOG;
-    pMOG = bgsegm::createBackgroundSubtractorGMG(100, 0.8);
+    pMOG = bgsegm::createBackgroundSubtractorGMG(100, 0.5);
 
     for(int i=0; i< 2107; i+=2){
         char pRGB[1024];
@@ -180,8 +216,8 @@ int main(){
         sprintf(pRGB, "/home/vmachado/Desktop/thermaltestimages/1b/img_%05d.bmp", i);
         sprintf(pNIR, "/home/vmachado/Desktop/thermaltestimages/1a/img_%05d.bmp", i+1);
 
-//        cout << pRGB << endl;
-//        cout << pNIR << endl;
+        //        cout << pRGB << endl;
+        //        cout << pNIR << endl;
 
         Mat inRGB = imread(pRGB);
         Mat inNIR = imread(pNIR, CV_LOAD_IMAGE_GRAYSCALE);
@@ -189,11 +225,13 @@ int main(){
         MSMat a;
         auto img = a.mergeRGBNIR(inRGB, inNIR);
         img.convertTo(img, CV_8UC3, 255.5);
-       // cv::imshow("mixed", ret); cv::waitKey(0);
+        // cv::imshow("mixed", ret); cv::waitKey(0);
 
-        pMOG->apply(img, fgMaskMOG);
+        pMOG->apply(inNIR, fgMaskMOG);
 
-        imshow("original",img);
+        imshow("nir",inNIR);
+        imshow("rgb",inRGB);
+        imshow("f",img);
         imshow("Foreground Mask",fgMaskMOG);
 
         char key = cv::waitKey(1);
@@ -205,8 +243,22 @@ int main(){
 
 
 
-//MSMat a;
-//auto ret = a.mergeRGBNIR(inRGB, inNIR);
-//cv::imshow("ret", ret); cv::waitKey(0);
+
+int main() {
+    //Pooling . . .
+
+    std::vector<Mat> planes;
+
+    //TODO -- do with a seq of images (tiff) vis2 bourgonha ...
+
+    cv::imreadmulti("/home/vmachado/Desktop/thermaltestimages/img000097.tif", planes);
+
+    MSMat ms(planes.at(0).cols, planes.at(0).rows, planes);
 
 
+    PoolingBS pbs = PoolingBS(7);
+    cv::Mat out;
+
+    pbs.initialize();
+    pbs.apply(ms, out);
+}
