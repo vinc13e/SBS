@@ -32,6 +32,7 @@ MSMat::MSMat(int w, int h, vector<cv::Mat> imgs, vector<double> r_w, vector<doub
         cv::resize(tmp, tmp2, cv::Size(w,h));
         planes.push_back(tmp2.clone());
     }
+
 }
 
 
@@ -51,7 +52,7 @@ void MSMat::normalize_weights(){
 
 }
 
-cv::Mat MSMat::toMat(int type){
+cv::Mat MSMat::toMat(int type){ //TODO type
     normalize_weights();
     cv::Mat R = cv::Mat::zeros(rows, cols, CV_64FC1);
     cv::Mat G = cv::Mat::zeros(rows, cols, CV_64FC1);

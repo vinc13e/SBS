@@ -242,8 +242,36 @@ int main_fusion(){
 }
 
 
+int main() {
+    //Pooling . . .
+
+    PoolingBS pbs = PoolingBS(7);
+    pbs.initialize();
+
+    for(int i=1; i<= 258; i++){
+        std::vector<Mat> planes;
+        cv::Mat out;
+        char filename[1024];
+        sprintf(filename, "/home/vmachado/Desktop/u-bourgone/video1/imgMS/img%06d.tif", i);
+//        cout << "filename" << filename << endl;
+        cv::imreadmulti(filename, planes);
+        MSMat ms(planes.at(0).cols, planes.at(0).rows, planes);
+        pbs.apply(ms, out, 1);
+        cv::imshow("original ", ms.toMat());
+        cv::imshow("mask", out);
+        planes.clear();
 
 
+        char key = cv::waitKey(0);
+        if(key == 'q' || key == 27){
+            break;
+        }
+
+    }
+}
+
+
+/*
 int main() {
     //Pooling . . .
 
@@ -262,3 +290,4 @@ int main() {
     pbs.initialize();
     pbs.apply(ms, out);
 }
+*/
