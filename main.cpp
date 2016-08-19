@@ -242,27 +242,35 @@ int main_fusion(){
 }
 
 
-int main() {
+int main_pooling() {
     //Pooling . . .
 
     PoolingBS pbs = PoolingBS(7);
     pbs.initialize();
 
-    for(int i=1; i<= 258; i++){
+    for(int i=540; i<= 2000; i++){
         std::vector<Mat> planes;
         cv::Mat out;
         char filename[1024];
-        sprintf(filename, "/home/vmachado/Desktop/u-bourgone/video1/imgMS/img%06d.tif", i);
-//        cout << "filename" << filename << endl;
+        //        sprintf(filename, "/home/vmachado/Desktop/u-bourgone/video2/imgMS/img%06d.tif", i);
+        sprintf(filename, "/home/vmachado/Desktop/u-bourgone/video2/imgMS/in%06d.tif", i);
+        cout << "filename: " << filename << endl;
         cv::imreadmulti(filename, planes);
         MSMat ms(planes.at(0).cols, planes.at(0).rows, planes);
         pbs.apply(ms, out, 1);
-        cv::imshow("original ", ms.toMat());
-        cv::imshow("mask", out);
+
+        //        cv::Mat eroded, dilated;
+        //        cv::erode(out, eroded, Mat(), Point(-1, -1), 2, 1, 1);
+        //        cv::dilate(eroded, dilated , Mat(), Point(-1, -1), 2, 1, 1);
+
+        cv::imshow("original ", planes.at(3) /*ms.toMat()*/);
+        cv::imshow("mask ori", out);
+        //        cv::imshow("mask eroded" , eroded);
+        //        cv::imshow("mask dilated", dilated);
         planes.clear();
 
 
-        char key = cv::waitKey(0);
+        char key = cv::waitKey(10);
         if(key == 'q' || key == 27){
             break;
         }
@@ -270,24 +278,41 @@ int main() {
     }
 }
 
+#include "spectralangle.h"
 
-/*
-int main() {
-    //Pooling . . .
+int main(){
+    //    spectralAngle
+    SpectralAngle sa;
+    bool initialized = false;
+    for(int i=540; i<= 2000; i++){
+        std::vector<Mat> planes;
+        cv::Mat mask;
+        char filename[1024];
+        sprintf(filename, "/home/vmachado/Desktop/u-bourgone/video2/imgMS/in%06d.tif", i);
+        cout << "filename: " << filename << endl;
+        cv::imreadmulti(filename, planes);
+        MSMat msFrame(planes.at(0).cols, planes.at(0).rows, planes);
 
-    std::vector<Mat> planes;
+        if(!initialized){
+            sa.initialize(msFrame);
+            initialized=true;
+            continue;
+        }
+        sa.apply(msFrame,mask, 0.97);
 
-    //TODO -- do with a seq of images (tiff) vis2 bourgonha ...
+        cv::imshow("original ", planes.at(6));
 
-    cv::imreadmulti("/home/vmachado/Desktop/thermaltestimages/img000097.tif", planes);
+//        cv::Mat dilated;
+//        cv::dilate(mask, dilated , Mat(), Point(-1, -1), 1, 1, 1);
+        cv::imshow("mask", mask);
 
-    MSMat ms(planes.at(0).cols, planes.at(0).rows, planes);
 
+//        planes.clear();
 
-    PoolingBS pbs = PoolingBS(7);
-    cv::Mat out;
+        char key = cv::waitKey(1);
+        if(key == 'q' || key == 27){
+            break;
+        }
 
-    pbs.initialize();
-    pbs.apply(ms, out);
+    }
 }
-*/

@@ -9,16 +9,6 @@
 #include <opencv2/video.hpp>
 #include <opencv2/bgsegm.hpp>
 
-//#ifdef __GNUC__
-//#define __funcname__ __PRETTY_FUNCTION__
-//#else
-//#define __funcname__ __FUNCTION__
-//#endif
-//#define createErrorMsg(msg)  \
-//    std::string(msg)+std::string(", where: ")+std::string(__funcname__)+std::string(", in file ")+ std::string(__FILE__)
-
-////! Useful macro for exception-throwing
-//#define ERROR(msg) throw forensica::Exception(createErrorMsg(msg))
 
 
 using namespace cv;
@@ -45,6 +35,8 @@ private:
     cv::Mat mergeRGBNIR(Mat rgb, Mat nir, vector<double> bw = {.5,.0,.0,.5}, vector<double> gw = {.0,.5,.0,.5}, vector<double> rw = {.0,.0,.5,.5});
     int getNPlanes();
     std::vector<cv::Mat> getPlanes() const;
+    int getRows() const;
+    int getCols() const;
 };
 
 

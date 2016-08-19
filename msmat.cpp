@@ -41,6 +41,16 @@ std::vector<cv::Mat> MSMat::getPlanes() const
     return planes;
 }
 
+int MSMat::getRows() const
+{
+    return rows;
+}
+
+int MSMat::getCols() const
+{
+    return cols;
+}
+
 void MSMat::normalize_weights(){
     auto r_acc = std::accumulate(r_weights.begin(), r_weights.end(), 0.0F); // 0.0F defines initial value and return type (0, 0.0f, 0.0F ...)
     auto g_acc = std::accumulate(g_weights.begin(), g_weights.end(), 0.0F);
